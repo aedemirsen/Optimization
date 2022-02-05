@@ -573,98 +573,98 @@ class _MyHomePageState extends State<MyHomePage> {
     input.storage = storage;
     optimizer = Optimizer(input);
 
-    //istenen idler
-    List<String> ids = profile.keys.toList();
-    for (var id in ids) {
-      if (storage.keys.toList().contains(id)) {
-        optimizer.optimize(id, input.profile![id]!);
-        Map<int, int> map = {};
-        storage[id]!
-            .toList()
-            .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
-        Map<int, int> storageMap = map;
-        Map<int, int> cutMap = optimizer.output.usedItemMap(id);
-        Map<int, int> missingItems = optimizer.missingMap(storageMap, cutMap);
-        //eksik profilleri outputtaki listeye ekleyelim
-        for (var item in missingItems.entries) {
-          String eksikProfil =
-              id + "#" + item.key.toString() + "#" + item.value.toString();
-          optimizer.output.eksikProfiller.add(eksikProfil);
-        }
-      } else {
-        Map<int, int> map = {};
-        profile[id]!
-            .toList()
-            .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
-        for (var item in map.entries) {
-          String eksikProfil =
-              id + "#" + item.key.toString() + "#" + item.value.toString();
-          optimizer.output.eksikProfiller.add(eksikProfil);
+    if (storage.isNotEmpty && profile.isNotEmpty) {
+      //istenen idler
+      List<String> ids = profile.keys.toList();
+      for (var id in ids) {
+        if (storage.keys.toList().contains(id)) {
+          optimizer.optimize(id, input.profile![id]!);
+          Map<int, int> map = {};
+          storage[id]!.toList().forEach(
+              (x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
+          Map<int, int> storageMap = map;
+          Map<int, int> cutMap = optimizer.output.usedItemMap(id);
+          Map<int, int> missingItems = optimizer.missingMap(storageMap, cutMap);
+          //eksik profilleri outputtaki listeye ekleyelim
+          for (var item in missingItems.entries) {
+            String eksikProfil =
+                id + "#" + item.key.toString() + "#" + item.value.toString();
+            optimizer.output.eksikProfiller.add(eksikProfil);
+          }
+        } else {
+          Map<int, int> map = {};
+          profile[id]!.toList().forEach(
+              (x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
+          for (var item in map.entries) {
+            String eksikProfil =
+                id + "#" + item.key.toString() + "#" + item.value.toString();
+            optimizer.output.eksikProfiller.add(eksikProfil);
+          }
         }
       }
-    }
 
-    List<String> cuts = optimizer.output.kesimBicimi;
-    for (var cut in cuts) {
-      List<DataCell> _cells = [];
-      var splitted = cut.split('#');
-      //1
-      var dc1 = DataCell(
-        Text(splitted[0]),
-      );
-      _cells.add(dc1);
-      //2
-      var dc2 = DataCell(
-        Text(splitted[1]),
-      );
-      _cells.add(dc2);
-      //3
-      var dc3 = DataCell(
-        Text(splitted[2]),
-      );
-      _cells.add(dc3);
-      //4
-      var dc4 = DataCell(
-        Text(splitted[3]),
-      );
-      _cells.add(dc4);
-      //5
-      var dc5 = DataCell(
-        Text(splitted[4]),
-      );
-      _cells.add(dc5);
+      List<String> cuts = optimizer.output.kesimBicimi;
+      for (var cut in cuts) {
+        List<DataCell> _cells = [];
+        var splitted = cut.split('#');
+        //1
+        var dc1 = DataCell(
+          Text(splitted[0]),
+        );
+        _cells.add(dc1);
+        //2
+        var dc2 = DataCell(
+          Text(splitted[1]),
+        );
+        _cells.add(dc2);
+        //3
+        var dc3 = DataCell(
+          Text(splitted[2]),
+        );
+        _cells.add(dc3);
+        //4
+        var dc4 = DataCell(
+          Text(splitted[3]),
+        );
+        _cells.add(dc4);
+        //5
+        var dc5 = DataCell(
+          Text(splitted[4]),
+        );
+        _cells.add(dc5);
 
-      _rows!.add(DataRow(cells: _cells));
-    }
-
-    for (var missing in optimizer.output.eksikProfiller) {
-      List<DataCell> _cells = [];
-      var splitted = missing.split('#');
-      //1
-      var dc1 = DataCell(
-        Text(splitted[0].toString()),
-      );
-      _cells.add(dc1);
-      //2
-      var dc2 = DataCell(
-        Text(splitted[1].toString()),
-      );
-      _cells.add(dc2);
-      //2
-      var dc3 = DataCell(
-        Text(splitted[2].toString()),
-      );
-      _cells.add(dc3);
-      _missingRow!.add(DataRow(cells: _cells));
-    }
-
-    setState(() {
-      _optimized = true;
-      _toplamFire = optimizer.output.toplamAtikUzunluk;
-      if (optimizer.output.eksikProfiller.isNotEmpty) {
-        _missingItem = true;
+        _rows!.add(DataRow(cells: _cells));
       }
-    });
+
+      for (var missing in optimizer.output.eksikProfiller) {
+        List<DataCell> _cells = [];
+        var splitted = missing.split('#');
+        //1
+        var dc1 = DataCell(
+          Text(splitted[0].toString()),
+        );
+        _cells.add(dc1);
+        //2
+        var dc2 = DataCell(
+          Text(splitted[1].toString()),
+        );
+        _cells.add(dc2);
+        //2
+        var dc3 = DataCell(
+          Text(splitted[2].toString()),
+        );
+        _cells.add(dc3);
+        _missingRow!.add(DataRow(cells: _cells));
+      }
+
+      setState(() {
+        _optimized = true;
+        _toplamFire = optimizer.output.toplamAtikUzunluk;
+        if (optimizer.output.eksikProfiller.isNotEmpty) {
+          _missingItem = true;
+        }
+      });
+    }
   }
 
   _line(type) {
