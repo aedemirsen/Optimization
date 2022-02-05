@@ -1,3 +1,3 @@
 class Input {
-  List<int>? storage, profile;
+  Map<String, List<int>>? storage, profile;
 }

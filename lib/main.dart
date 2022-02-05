@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:optimization/optimization.dart';
 
 import 'login.dart';
 
@@ -16,8 +17,7 @@ void main() async {
 
   runApp(
     const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Login(),
-    ),
+        debugShowCheckedModeBanner: false, home: Optimization() //Login(),
+        ),
   );
 }

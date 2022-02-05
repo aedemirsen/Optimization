@@ -5,22 +5,22 @@ import 'solver.dart';
 class Optimizer {
   late Input input;
   late Output output;
-  late List<String> sequences;
 
   Optimizer(this.input) {
     output = Output();
-    sequences = [];
   }
 
-  void optimize() {
-    var solver = Solver(input.storage);
-    var results = solver.solve(input.profile!);
+  void optimize(String id, List<int> list) {
+    List<int> kullanilacakProfiller = input.storage![id]!;
+
+    var solver = Solver(kullanilacakProfiller);
+    var results = solver.solve(list);
 
     List<String> conf = [];
 
     //profil_id#Kesilen Profil#Elde edilen profiller#fire#kesim adeti
     for (var result in results) {
-      String s = result.originalLength.toString() + "#";
+      String s = id + "#" + result.originalLength.toString() + "#";
       for (var c in result.cuts!) {
         s += c.toString() + ",";
       }
@@ -41,26 +41,26 @@ class Optimizer {
     output.kesimBicimi.addAll(dConf);
   }
 
-  Map<int, int> storageMap(Input input) {
-    Map<int, int> items = <int, int>{};
-    var storageSet = input.storage!.toSet();
-    for (var s in storageSet) {
-      items.putIfAbsent(s, () => 0);
-      for (var len in input.storage!) {
-        if (s == len) {
-          items.update(s, (value) => ++value);
-        }
-      }
-    }
-    return items;
-  }
+  // Map<int, int> storageMap(Input input) {
+  //   Map<int, int> items = <int, int>{};
+  //   var storageSet = input.storage!.toSet();
+  //   for (var s in storageSet) {
+  //     items.putIfAbsent(s, () => 0);
+  //     for (var len in input.storage!) {
+  //       if (s == len) {
+  //         items.update(s, (value) => ++value);
+  //       }
+  //     }
+  //   }
+  //   return items;
+  // }
 
   Map<int, int> missingMap(Map<int, int> storage, Map<int, int> cutMap) {
     Map<int, int> items = <int, int>{};
     for (var cut in cutMap.entries) {
       int count = cut.value;
-      int? available = storage[cut.key];
-      int missing = count - available!;
+      int available = storage[cut.key]!;
+      int missing = count - available;
       if (missing > 0) {
         items.putIfAbsent(cut.key, () => missing);
       }

@@ -164,16 +164,16 @@ class LoginState extends State<Login> {
                                         mail: email, password: password)
                                     .then((user) {
                                   try {
-                                    print(user!.email);
+                                    //print(user!.email);
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            Optimization(email: user.email),
+                                            const Optimization(),
                                       ),
                                       (route) => false,
                                     );
-                                    print("başarılı giriş");
+                                    //print("başarılı giriş");
                                   } catch (e) {
                                     setState(() {
                                       _warning =
@@ -181,7 +181,7 @@ class LoginState extends State<Login> {
                                       _edge = Colors.red;
                                       _borderWidth = 2;
                                     });
-                                    print("HATA! - " + e.toString());
+                                    //print("HATA! - " + e.toString());
                                   }
                                 });
                               } else {
@@ -191,9 +191,9 @@ class LoginState extends State<Login> {
                                   _edge = Colors.red;
                                   _borderWidth = 2;
                                 });
-                                print("kullanıcı bilgileri yanlış.");
-                                print(email);
-                                print(password);
+                                // print("kullanıcı bilgileri yanlış.");
+                                // print(email);
+                                // print(password);
                               }
                             },
                             child: const Text(

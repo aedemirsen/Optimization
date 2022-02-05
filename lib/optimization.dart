@@ -6,9 +6,9 @@ import 'model/input.dart';
 import 'optimizer.dart';
 
 class Optimization extends StatelessWidget {
-  Optimization({Key? key, required this.email}) : super(key: key);
+  const Optimization({Key? key}) : super(key: key);
 
-  String? email;
+  // final String? email;
 
   // This widget is the root of your application.
   @override
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Positioned.fill(
               child: Opacity(
-                opacity: 0.6,
+                opacity: 0.4,
                 child: Image.asset(
                   '1.jpg',
                   fit: BoxFit.fitWidth,
@@ -208,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           const Padding(
                             padding: EdgeInsets.all(10.0),
                             child: Text(
-                              'PROFİL BİLGİSİ',
+                              'İSTENEN PROFİL BİLGİSİ',
                               style: TextStyle(
                                 fontFamily: 'Arial',
                                 fontSize: 20,
@@ -329,6 +329,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             columns: const [
                               DataColumn(
                                 label: Text(
+                                  'Profil Kod',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
                                   'Kesilecek Profil',
                                   style: TextStyle(
                                     fontSize: 18,
@@ -420,7 +429,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding:
+                                  const EdgeInsets.only(top: 10, bottom: 20),
                               child: DataTable(
                                 decoration: BoxDecoration(
                                   border: Border.all(
@@ -432,6 +442,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fontFamily: 'Arial',
                                 ),
                                 columns: const [
+                                  DataColumn(
+                                    label: Text(
+                                      'Profil Kod',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                   DataColumn(
                                     label: Text(
                                       'Gerekli Uzunluk',
@@ -473,116 +492,175 @@ class _MyHomePageState extends State<MyHomePage> {
     _rows!.clear();
     _missingRow!.clear();
     _missingItem = false;
-
     Input input = Input();
 
-    List<int> storage = [];
-    for (var s in _storageTextControllers) {
-      if (s[0].text == "") {
+    //istenen bütün profilleri map e ekleyelim.
+    Map<String, List<int>> profile = {};
+    for (var p in _profileTextControllers) {
+      String id = p[0].text;
+      String length = p[1].text;
+      String count = p[2].text;
+      if (id == "") {
         setState(() {
           _warning = true;
           _type = 0;
         });
-      } else if (s[1].text == "") {
+      } else if (length == "") {
+        setState(() {
+          _warning = true;
+          _type = 0;
+        });
+      } else if (count == "") {
         setState(() {
           _warning = true;
           _type = 0;
         });
       } else {
-        for (int i = 0; i < int.parse(s[1].text); i++) {
-          storage.add(int.parse(s[0].text));
+        List<int> list =
+            List.generate(int.parse(count), (index) => int.parse(length));
+        if (profile.isNotEmpty) {
+          try {
+            list.addAll(profile[id]!);
+            // ignore: empty_catches
+          } catch (e) {}
         }
-      }
-    }
-    input.storage = storage;
-    List<int> profile = [];
-    for (var s in _profileTextControllers) {
-      if (s[0].text == "") {
-        setState(() {
-          _warning = true;
-          _type = 1;
-        });
-      } else if (s[1].text == "") {
-        setState(() {
-          _warning = true;
-          _type = 1;
-        });
-      } else {
-        for (int i = 0; i < int.parse(s[1].text); i++) {
-          profile.add(int.parse(s[0].text));
-        }
+        profile.update(
+          id,
+          (value) => list,
+          ifAbsent: () => list,
+        );
       }
     }
     input.profile = profile;
 
-    //Optimization
+    //Stok bilgisini oluşturalım
+    Map<String, List<int>> storage = {};
+    for (var s in _storageTextControllers) {
+      String id = s[0].text;
+      String length = s[1].text;
+      String count = s[2].text;
+      if (id == "") {
+        setState(() {
+          _warning = true;
+          _type = 0;
+        });
+      } else if (length == "") {
+        setState(() {
+          _warning = true;
+          _type = 0;
+        });
+      } else if (count == "") {
+        setState(() {
+          _warning = true;
+          _type = 0;
+        });
+      } else {
+        List<int> list =
+            List.generate(int.parse(count), (index) => int.parse(length));
+        if (storage.isNotEmpty) {
+          try {
+            list.addAll(storage[id]!);
+            // ignore: empty_catches
+          } catch (e) {}
+        }
+        storage.update(
+          s[0].text,
+          (value) => list,
+          ifAbsent: () => list,
+        );
+      }
+    }
+    input.storage = storage;
     optimizer = Optimizer(input);
 
-    if (storage.isNotEmpty && profile.isNotEmpty) {
-      optimizer.optimize();
-
-      Map<int, int> storageMap = optimizer.storageMap(input);
-      Map<int, int> cutMap = optimizer.output.usedItemMap();
+    //istenen idler
+    List<String> ids = profile.keys.toList();
+    for (var id in ids) {
+      optimizer.optimize(id, input.profile![id]!);
+      Map<int, int> map = {};
+      storage[id]!
+          .toList()
+          .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
+      Map<int, int> storageMap = map;
+      Map<int, int> cutMap = optimizer.output.usedItemMap(id);
       Map<int, int> missingItems = optimizer.missingMap(storageMap, cutMap);
-
-      List<String> cuts = optimizer.output.kesimBicimi;
-      for (var cut in cuts) {
-        List<DataCell> _cells = [];
-        var splitted = cut.split('#');
-        //1
-        var dc1 = DataCell(
-          Text(splitted[0]),
-        );
-        _cells.add(dc1);
-        //2
-        var dc2 = DataCell(
-          Text(splitted[1]),
-        );
-        _cells.add(dc2);
-        //3
-        var dc3 = DataCell(
-          Text(splitted[2]),
-        );
-        _cells.add(dc3);
-        //4
-        var dc4 = DataCell(
-          Text(splitted[3]),
-        );
-        _cells.add(dc4);
-
-        _rows!.add(DataRow(cells: _cells));
+      //eksik profilleri outputtaki listeye ekleyelim
+      for (var item in missingItems.entries) {
+        String eksikProfil =
+            id + "#" + item.key.toString() + "#" + item.value.toString();
+        optimizer.output.eksikProfiller.add(eksikProfil);
       }
-
-      for (var missing in missingItems.entries) {
-        List<DataCell> _cells = [];
-        //1
-        var dc1 = DataCell(
-          Text(missing.key.toString()),
-        );
-        _cells.add(dc1);
-        //2
-        var dc2 = DataCell(
-          Text(missing.value.toString()),
-        );
-        _cells.add(dc2);
-        _missingRow!.add(DataRow(cells: _cells));
-      }
-
-      setState(() {
-        _optimized = true;
-        _toplamFire = optimizer.output.toplamAtikUzunluk;
-        if (missingItems.isNotEmpty) {
-          _missingItem = true;
-        }
-      });
     }
+
+    List<String> cuts = optimizer.output.kesimBicimi;
+    for (var cut in cuts) {
+      List<DataCell> _cells = [];
+      var splitted = cut.split('#');
+      //1
+      var dc1 = DataCell(
+        Text(splitted[0]),
+      );
+      _cells.add(dc1);
+      //2
+      var dc2 = DataCell(
+        Text(splitted[1]),
+      );
+      _cells.add(dc2);
+      //3
+      var dc3 = DataCell(
+        Text(splitted[2]),
+      );
+      _cells.add(dc3);
+      //4
+      var dc4 = DataCell(
+        Text(splitted[3]),
+      );
+      _cells.add(dc4);
+      //5
+      var dc5 = DataCell(
+        Text(splitted[4]),
+      );
+      _cells.add(dc5);
+
+      _rows!.add(DataRow(cells: _cells));
+    }
+
+    for (var missing in optimizer.output.eksikProfiller) {
+      List<DataCell> _cells = [];
+      var splitted = missing.split('#');
+      //1
+      var dc1 = DataCell(
+        Text(splitted[0].toString()),
+      );
+      _cells.add(dc1);
+      //2
+      var dc2 = DataCell(
+        Text(splitted[1].toString()),
+      );
+      _cells.add(dc2);
+      //2
+      var dc3 = DataCell(
+        Text(splitted[2].toString()),
+      );
+      _cells.add(dc3);
+      _missingRow!.add(DataRow(cells: _cells));
+    }
+
+    setState(() {
+      _optimized = true;
+      _toplamFire = optimizer.output.toplamAtikUzunluk;
+      if (optimizer.output.eksikProfiller.isNotEmpty) {
+        _missingItem = true;
+      }
+    });
   }
 
   _line(type) {
-    //generate 2 text editing controller
+    //generate 3 text editing controller
+    var id = TextEditingController();
     var len = TextEditingController();
     var quantity = TextEditingController();
-    List<TextEditingController> line = [len, quantity];
+    List<TextEditingController> line = [id, len, quantity];
     //type 0 => storage
     //type 1 => profile
     if (type == 0) {
@@ -597,6 +675,19 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Padding(padding: EdgeInsets.only(left: 8, right: 4)),
+            SizedBox(
+              height: 30,
+              width: 80,
+              child: CupertinoTextField(
+                controller: id,
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+                placeholder: 'Id',
+                keyboardType: TextInputType.text,
+              ),
+            ),
+            const Padding(padding: EdgeInsets.only(left: 4, right: 4)),
             Flexible(
               flex: 2,
               child: SizedBox(

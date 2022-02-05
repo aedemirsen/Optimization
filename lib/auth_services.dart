@@ -9,13 +9,13 @@ class Authentication {
     try {
       UserCredential userCredential = await auth.signInWithEmailAndPassword(
           email: mail, password: password);
-      print("Giriş yapıldı.${userCredential.user!.email}");
+      //print("Giriş yapıldı.${userCredential.user!.email}");
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
-        print("Kullanıcı bulunamadı.");
+        //print("Kullanıcı bulunamadı.");
       } else {
-        print("Hatalı şifre.");
+        //print("Hatalı şifre.");
       }
     }
   }
