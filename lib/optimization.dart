@@ -576,19 +576,31 @@ class _MyHomePageState extends State<MyHomePage> {
     //istenen idler
     List<String> ids = profile.keys.toList();
     for (var id in ids) {
-      optimizer.optimize(id, input.profile![id]!);
-      Map<int, int> map = {};
-      storage[id]!
-          .toList()
-          .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
-      Map<int, int> storageMap = map;
-      Map<int, int> cutMap = optimizer.output.usedItemMap(id);
-      Map<int, int> missingItems = optimizer.missingMap(storageMap, cutMap);
-      //eksik profilleri outputtaki listeye ekleyelim
-      for (var item in missingItems.entries) {
-        String eksikProfil =
-            id + "#" + item.key.toString() + "#" + item.value.toString();
-        optimizer.output.eksikProfiller.add(eksikProfil);
+      if (storage.keys.toList().contains(id)) {
+        optimizer.optimize(id, input.profile![id]!);
+        Map<int, int> map = {};
+        storage[id]!
+            .toList()
+            .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
+        Map<int, int> storageMap = map;
+        Map<int, int> cutMap = optimizer.output.usedItemMap(id);
+        Map<int, int> missingItems = optimizer.missingMap(storageMap, cutMap);
+        //eksik profilleri outputtaki listeye ekleyelim
+        for (var item in missingItems.entries) {
+          String eksikProfil =
+              id + "#" + item.key.toString() + "#" + item.value.toString();
+          optimizer.output.eksikProfiller.add(eksikProfil);
+        }
+      } else {
+        Map<int, int> map = {};
+        profile[id]!
+            .toList()
+            .forEach((x) => map[x] = !map.containsKey(x) ? (1) : (map[x]! + 1));
+        for (var item in map.entries) {
+          String eksikProfil =
+              id + "#" + item.key.toString() + "#" + item.value.toString();
+          optimizer.output.eksikProfiller.add(eksikProfil);
+        }
       }
     }
 

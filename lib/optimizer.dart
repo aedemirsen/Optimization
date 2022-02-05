@@ -12,7 +12,6 @@ class Optimizer {
 
   void optimize(String id, List<int> list) {
     List<int> kullanilacakProfiller = input.storage![id]!;
-
     var solver = Solver(kullanilacakProfiller);
     var results = solver.solve(list);
 
@@ -40,20 +39,6 @@ class Optimizer {
     //kesim biçimini outputa ekleyelim.
     output.kesimBicimi.addAll(dConf);
   }
-
-  // Map<int, int> storageMap(Input input) {
-  //   Map<int, int> items = <int, int>{};
-  //   var storageSet = input.storage!.toSet();
-  //   for (var s in storageSet) {
-  //     items.putIfAbsent(s, () => 0);
-  //     for (var len in input.storage!) {
-  //       if (s == len) {
-  //         items.update(s, (value) => ++value);
-  //       }
-  //     }
-  //   }
-  //   return items;
-  // }
 
   Map<int, int> missingMap(Map<int, int> storage, Map<int, int> cutMap) {
     Map<int, int> items = <int, int>{};
