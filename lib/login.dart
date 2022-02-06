@@ -163,8 +163,7 @@ class LoginState extends State<Login> {
                                     .signInWithEmail(
                                         mail: email, password: password)
                                     .then((user) {
-                                  try {
-                                    //print(user!.email);
+                                  if (user != null && user.emailVerified) {
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
@@ -174,7 +173,7 @@ class LoginState extends State<Login> {
                                       (route) => false,
                                     );
                                     //print("başarılı giriş");
-                                  } catch (e) {
+                                  } else {
                                     setState(() {
                                       _warning =
                                           'Kullanıcı adı ve ya parola yanlış!';
@@ -186,8 +185,7 @@ class LoginState extends State<Login> {
                                 });
                               } else {
                                 setState(() {
-                                  _warning =
-                                      'Kullanıcı adı ve ya parola yanlış!';
+                                  _warning = 'Lütfen alanlarını doldurunuz!';
                                   _edge = Colors.red;
                                   _borderWidth = 2;
                                 });
